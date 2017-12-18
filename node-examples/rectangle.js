@@ -2,7 +2,7 @@ module.exports = (x, y, callback) => {
 	"use strict";
 	if (x <= 0 || y <= 0) {
 		setTimeout(() =>
-			callback(new Error("Rectangle dimensions should be grater than zero: l = " + x + ", and b = " + y), null),
+			callback(new Error(`Rectangle dimensions should be grater than zero: l = ${x}, and b = ${y}`), null),
 			2000
 		);
 	}
