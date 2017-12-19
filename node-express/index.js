@@ -1,16 +1,20 @@
 const http = require('http');
 const express = require('express');
+const morgan = require('morgan');
 
 const hostname = 'localhost';
 const port = 3000;
 
 const app = express();
+app.use(morgan('dev'));
+
+app.use(express.static(__dirname + '/public'));
 
 app.use((request, response, next) => {
 	"use strict";
 	const {headers} = request;
 
-	console.log(headers);
+
 
 	response.statusCode = 200;
 	response.setHeader('Content-Type', 'text/html');
