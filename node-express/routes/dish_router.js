@@ -30,27 +30,25 @@ dish_router.route('/')
 		res.end('Deleting all the dishes!');
 	});
 
+dish_router.route('/:dish_id')
+	.get((req, res, next) => {
+		"use strict";
+		res.end(`Will send details of the dish: ${req.params.dish_id} to you!`);
+	})
+	.post((req, res, next) => {
+		"use strict";
+		res.statusCode = 403;
+		res.end(`POST operation not supported on /dishes/ ${req.params.dish_id}`);
+	})
+	.put((req, res, next) => {
+		"use strict";
+		res.write(`Updating the dish: ${req.params.dish_id} \n`);
+		res.end(`Will update the dish: ${req.body.name} with details ${req.body.description}`)
+	})
+	.delete((req, res, next) => {
+		"use strict";
+		res.end(`Deleting dish: ${req.params.dish_id}!`);
+	});
+
 module.exports = dish_router;
 
-// app.get('/dishes/:dish_id', (req, res, next) => {
-// 	"use strict";
-// 	res.end(`Will send details of the dish: ${req.params.dish_id} to you!`);
-// });
-//
-// app.post('/dishes/:dish_id', (req, res, next) => {
-// 	"use strict";
-// 	res.statusCode = 403;
-// 	res.end(`POST operation not supported on /dishes/ ${req.params.dish_id}`);
-// });
-//
-// app.put('/dishes/:dish_id', (req, res, next) => {
-// 	"use strict";
-// 	res.write(`Updating the dish: ${req.params.dish_id} \n`);
-// 	res.end(`Will update the dish: ${req.body.name} with details ${req.body.description}`)
-// });
-//
-//
-// app.delete('/dishes/:dish_id', (req, res, next) => {
-// 	"use strict";
-// 	res.end(`Deleting dish: ${req.params.dish_id}!`);
-// });
