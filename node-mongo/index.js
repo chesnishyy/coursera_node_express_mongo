@@ -1,37 +1,43 @@
 const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
 
 const dboper = require('./operations');
+
 const url = 'mongodb://127.0.0.1:27017/conFusion';
 
-MongoClient.connect(url, (err, client) => {
-	"use strict";
-	assert.equal(err, null);
+MongoClient.connect(url).then((client) => {
 
 	console.log(`Connected correctly to server`);
 
 	const dbName = 'conFusion';
 	const db = client.db(dbName);
 
-	dboper.insertDocument(db, {name: 'Vadonut', description: 'Test'}, 'dishes', (result) => {
-		console.log('Insert document: \n', result.ops);
+	dboper.insertDocument(db, {name: 'Vadonut', description: 'Test'}, 'dishes')
+		.then((result) => {
+			console.log('Insert document: \n', result.ops);
 
-		dboper.findDocuments(db, 'dishes', (docs) => {
+			return dboper.findDocuments(db, 'dishes');
+		})
+		.then((docs) => {
 			console.log('Found Documents: \n', docs);
 
-			dboper.updateDocument(db, {name: 'Vadonut'}, {description: 'Updated Test'}, 'dishes', (result) => {
-				console.log('Updated Document: \n', result.result);
-
-				dboper.findDocuments(db, 'dishes', (docs) => {
-					console.log('Found Updated Document: \n', docs);
-
-					db.dropCollection('dishes', (result) => {
-						console.log('Dropped Collection: ', result);
-
-						client.close();
-					});
-				})
-			})
+			return dboper.updateDocument(db, {name: 'Vadonut'}, {description: 'Updated Test'}, 'dishes');
 		})
-	})
-});
+		.then((result) => {
+			console.log('Updated Document: \n', result.result);
+
+			return dboper.findDocuments(db, 'dishes');
+		})
+		.then((docs) => {
+			console.log('Found Updated Document: \n', docs);
+
+			return db.dropCollection('dishes');
+		})
+		.then((result) => {
+			console.log('Dropped Collection: ', result);
+
+			return client.close();
+		})
+		.catch((err) => console.log(err));
+
+}, (err) => console.log(err))
+	.catch((err) => console.log(err));
