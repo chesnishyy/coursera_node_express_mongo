@@ -3,19 +3,17 @@ mongoose.Promise = require('bluebird');
 
 const Dishes = require('./models/dishes');
 
-const url = 'mongodb://localhost:27017/conFusion';
+const url = 'mongodb://127.0.0.1:27017/conFusion';
 const connect = mongoose.connect(url);
 
-connect.then((db) => {
+connect.then((database) => {
 
     console.log('Connected correctly to server');
 
     var newDish = Dishes({
         name: 'Uthappizza',
-        description: 'test'
+        description: 'some description'
     });
-
-    debugger
 
     newDish.save()
         .then((dish) => {
@@ -26,10 +24,10 @@ connect.then((db) => {
         .then((dishes) => {
             console.log(dishes);
 
-            return db.collection('dishes').drop();
+            return database.connection.db.collection('dishes').drop();
         })
         .then(() => {
-            return db.close();
+            return database.connection.close();
         })
         .catch((err) => {
             console.log(err);

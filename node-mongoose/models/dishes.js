@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 const dishSchema = new Schema({
 	name: {
 		type: String,
-		required: true
-		//unique: true
+		required: true,
+		unique: true
 	},
 	description: {
 		type: String,
