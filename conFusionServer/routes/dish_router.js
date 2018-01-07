@@ -1,24 +1,35 @@
 const express = require('express');
 const body_parser = require('body-parser');
+const mongoose = require('mongoose');
+
+const Dishes = require('../models/dishes')
 
 const dish_router = express.Router();
 
-dish_router.use(body_parser.json());
+//dish_router.use(body_parser.json());
 
 dish_router.route('/')
-	.all((req, res, next) => {
-		"use strict";
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'text/plain');
-		next();
-	})
+
 	.get((req, res, next) => {
 		"use strict";
-		res.end('Will send all the dishes to you!');
+		Dishes.find({})
+			.then((dishes) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(dishes)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
-		res.end(`Will add the dish: ${req.body.name} with  details: ${req.body.description}`);
+		Dishes.create(req.body)
+			.then((dish) => {
+				console.log('Dish Created', dish);
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(dish) 
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.put((req, res, next) => {
 		"use strict";
@@ -27,13 +38,25 @@ dish_router.route('/')
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end('Deleting all the dishes!');
+		Dishes.remove({})
+			.then((response) => {
+				res.statusCode = 200;
+					res.setHeader('Contrent-Type', 'application/json');
+					res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 dish_router.route('/:dish_id')
 	.get((req, res, next) => {
 		"use strict";
-		res.end(`Will send details of the dish: ${req.params.dish_id} to you!`);
+		Dishes.findById(req.params.dish_id)
+			.then((dish) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(dish)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
@@ -42,12 +65,25 @@ dish_router.route('/:dish_id')
 	})
 	.put((req, res, next) => {
 		"use strict";
-		res.write(`Updating the dish: ${req.params.dish_id} \n`);
-		res.end(`Will update the dish: ${req.body.name} with details ${req.body.description}`)
+		Dishes.findByIdAndUpdate(req.params.dish_id, {
+			$set: req.body
+		}, { new: true })
+			.then((dish) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(dish)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end(`Deleting dish: ${req.params.dish_id}!`);
+		Dishes.findByIdAndRemove(req.params.dish_id)
+			.then((response) => {
+				res.statusCode = 200;
+					res.setHeader('Contrent-Type', 'application/json');
+					res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 module.exports = dish_router;
