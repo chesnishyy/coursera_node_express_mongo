@@ -14,37 +14,38 @@ connect.then((db) => {
         name: "Uthappizza",
         description: 'TEST'
     })
-    .then((dish) => {
-        console.log(dish);
+        .then((dish) => {
+            console.log(dish);
 
-        return Dishes.findByIdAndUpdate(dish._id, {
-            $set: {description: 'Updated test'}
-        },
-        {
-            new: true
+            return Dishes.findByIdAndUpdate(dish._id, {
+                $set: {
+                    description: 'Updated test'
+                }
+            }, {
+                    new: true
+                })
+                .exec();
         })
-        .exec();
-    })
-    .then((dish) => {
-        console.log(dish);
+        .then((dish) => {
+            console.log(dish);
 
-        dish.comments.push({
-            rating: 5,
-            comment: 'I\'m getting a sinking feeling!',
-            author: 'Leonardo di Caprio'
+            dish.comments.push({
+                rating: 5,
+                comment: 'I\'m getting a sinking feeling!',
+                author: 'Leonardo di Caprio'
+            })
+
+            return dish.save();
         })
+        .then((dish) => {
+            console.log(dish);
 
-        return dish.save();
-    })
-    .then((dish) => {
-        console.log(dish);
-
-        return db.connection.db.collection('dishes').drop();
-    })
-    .then(() => {
-        return db.connection.close();
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+            return db.connection.db.collection('dishes').drop();
+        })
+        .then(() => {
+            return db.connection.close();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
