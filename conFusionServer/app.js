@@ -14,8 +14,6 @@ var leader_router = require('./routes/leader_router');
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-const Dishes = require('./models/dishes');
-
 const url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
 
@@ -37,6 +35,37 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+function auth(req, res, next) {
+  console.log(req.headers);
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    const err = new Error('You are not authenticated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    return next(err);
+  }
+
+  const auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
+  const username = auth[0];
+  const password = auth[1];
+
+  if (username === 'admin' && password === 'password') {
+    next();
+  }
+  else {
+    const err = new Error('You are not authenticated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    return next(err);
+  }
+}
+
+app.use(auth);
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
@@ -46,14 +75,14 @@ app.use('/promotions', promo_router);
 app.use('/leaders', leader_router);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
