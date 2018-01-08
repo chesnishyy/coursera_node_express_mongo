@@ -1,24 +1,34 @@
 const express = require('express');
 const body_parser = require('body-parser');
+const mongoose = require('mongoose');
+
+const Promotions = require('../models/promotions');
 
 const promo_router = express.Router();
 
 promo_router.use(body_parser.json());
 
 promo_router.route('/')
-	.all((req, res, next) => {
-		"use strict";
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'text/plain');
-		next();
-	})
 	.get((req, res, next) => {
 		"use strict";
-		res.end('Will send all the promotions to you!');
+		Promotions.find({})
+			.then((promotions) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(promotions)
+			}, (err) => next(err))
+			.catch((err) => console.log(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
-		res.end(`Will add the promotion: ${req.body.name} with  details: ${req.body.description}`);
+		Promotions.create(req.body)
+			.then((promotion) => {
+				console.log('Promotion Created', promotion);
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(promotion)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.put((req, res, next) => {
 		"use strict";
@@ -27,13 +37,25 @@ promo_router.route('/')
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end('Deleting all the promotions!');
+		Dishes.remove({})
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 promo_router.route('/:promoId')
 	.get((req, res, next) => {
 		"use strict";
-		res.end(`Will send details of the promo: ${req.params.promoId} to you!`);
+		Promotions.findById(req.params.promoId)
+			.then((promotion) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(promotion)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
@@ -42,12 +64,27 @@ promo_router.route('/:promoId')
 	})
 	.put((req, res, next) => {
 		"use strict";
-		res.write(`Updating the promo: ${req.params.promoId} \n`);
-		res.end(`Will update the promo: ${req.body.name} with details ${req.body.description}`)
+		Promotions.findByIdAndUpdate(req.params.promoId, {
+			$set: req.body
+		}, {
+				new: true
+			})
+			.then((promotion) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(promotion)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end(`Deleting promo: ${req.params.promoId}!`);
+		Promotions.findByIdAndRemove(req.params.promoId)
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 module.exports = promo_router;

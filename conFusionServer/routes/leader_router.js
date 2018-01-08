@@ -1,24 +1,33 @@
 const express = require('express');
 const body_parser = require('body-parser');
+const mongoose = require('mongoose');
+
+const Leaders = require('../models/leaders');
 
 const leader_router = express.Router();
 
 leader_router.use(body_parser.json());
 
 leader_router.route('/')
-	.all((req, res, next) => {
-		"use strict";
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'text/plain');
-		next();
-	})
 	.get((req, res, next) => {
 		"use strict";
-		res.end('Will send all the leaders to you!');
+		Leaders.find({})
+			.then((leaders) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(leaders);
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
-		res.end(`Will add the leader: ${req.body.name} with  details: ${req.body.description}`);
+		Leaders.create(req.body)
+			.then((leader) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(leader);
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	})
 	.put((req, res, next) => {
 		"use strict";
@@ -27,13 +36,25 @@ leader_router.route('/')
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end('Deleting all the leaders!');
+		Leaders.remove({})
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 leader_router.route('/:leaderId')
 	.get((req, res, next) => {
 		"use strict";
-		res.end(`Will send details of the leader: ${req.params.leaderId} to you!`);
+		Leaders.findById(req.params.leaderId)
+			.then((leader) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(leader)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.post((req, res, next) => {
 		"use strict";
@@ -42,13 +63,27 @@ leader_router.route('/:leaderId')
 	})
 	.put((req, res, next) => {
 		"use strict";
-		res.write(`Updating the leader: ${req.params.leaderId} \n`);
-		res.end(`Will update the leader: ${req.body.name} with details ${req.body.description}`)
+		Leaders.findByIdAndUpdate(req.params.leaderId, {
+			$set: req.body
+		}, {
+				new: true
+			})
+			.then((leader) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(leader)
+			}, (err) => next(err))
+			.catch((err) => next(err));
 	})
 	.delete((req, res, next) => {
 		"use strict";
-		res.end(`Deleting leader: ${req.params.leaderId}!`);
+		Leaders.findByIdAndRemove(req.params.leaderId)
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Contrent-Type', 'application/json');
+				res.json(response)
+			}, (err) => console.log(err))
+			.catch((err) => console.log(err));
 	});
 
 module.exports = leader_router;
-

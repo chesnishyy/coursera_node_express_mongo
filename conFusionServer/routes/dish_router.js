@@ -6,10 +6,9 @@ const Dishes = require('../models/dishes')
 
 const dish_router = express.Router();
 
-//dish_router.use(body_parser.json());
+dish_router.use(body_parser.json());
 
 dish_router.route('/')
-
 	.get((req, res, next) => {
 		"use strict";
 		Dishes.find({})
