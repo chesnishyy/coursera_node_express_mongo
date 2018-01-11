@@ -1,15 +1,17 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var dish_router = require('./routes/dish_router');
-var promo_router = require('./routes/promo_router');
-var leader_router = require('./routes/leader_router');
+const index = require('./routes/index');
+const users = require('./routes/users');
+const dish_router = require('./routes/dish_router');
+const promo_router = require('./routes/promo_router');
+const leader_router = require('./routes/leader_router');
 
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -23,7 +25,7 @@ connect.then((db) => {
   console.log(err);
 })
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,12 +36,22 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser('12345-67890-09876-54321'));
+//app.use(cookieParser('12345-67890-09876-54321'));
+app.use(session({
+  name: 'session-id',
+  secret: '12345-67890-09876-54321',
+  saveUninitialized: false,
+  resave: false,
+  store: new FileStore(),
+  cookie: {
+    maxAge: 10800000
+  }
+}));
 
 function auth(req, res, next) {
-  console.log(req.signedCookies);
+  console.log(req.session);
 
-  if (!req.signedCookies.user) {
+  if (!req.session.user) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -54,7 +66,7 @@ function auth(req, res, next) {
     const password = auth[1];
 
     if (username === 'admin' && password === 'password') {
-      res.cookie('user', 'admin', {signed: true});
+      req.session.user = 'admin';
       next();
     }
     else {
@@ -65,11 +77,12 @@ function auth(req, res, next) {
     }
   }
   else {
-    if (req.signedCookies.user === 'admin') {
+    if (req.session.user === 'admin') {
       next();
     }
     else {
       const err = new Error('You are not authenticated!');
+
       err.status = 401;
       return next(err);
     }
